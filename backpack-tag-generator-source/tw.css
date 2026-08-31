@@ -1,0 +1,20 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer components {
+  .lbl   { @apply mb-1.5 flex items-baseline justify-between text-[11px] font-medium uppercase tracking-wider text-slate-400; }
+  .val   { @apply font-mono text-[11px] normal-case tracking-normal text-lime-400; }
+  .inp   { @apply w-full rounded-md border border-slate-700 bg-slate-900 px-2.5 py-1.5 text-sm text-slate-100 outline-none transition placeholder:text-slate-600 focus:border-lime-500; }
+  .rng   { @apply h-1 w-full cursor-pointer appearance-none rounded bg-slate-700 accent-lime-400; }
+  .sec   { @apply border-b border-slate-800; }
+  .sec-h { @apply flex w-full items-center gap-2 px-4 py-3 text-left transition hover:bg-slate-900; }
+  .sec-t { @apply flex-1 text-[11px] font-semibold uppercase tracking-[0.14em] text-slate-300; }
+  .sec-b { @apply space-y-3.5 px-4 pb-5 pt-1; }
+  .chip  { @apply rounded border border-slate-700 px-2 py-1 text-[11px] text-slate-400 transition hover:border-slate-500 hover:text-slate-200; }
+  .chip-on { @apply border-lime-500 bg-lime-500 text-slate-950 hover:border-lime-400 hover:text-slate-950; }
+  .btn   { @apply flex items-center justify-center gap-2 rounded-md px-3 py-2 text-xs font-semibold transition; }
+  .btn-p { @apply bg-lime-400 text-slate-950 hover:bg-lime-300; }
+  .btn-s { @apply border border-slate-700 bg-slate-900 text-slate-200 hover:border-slate-500; }
+  .swatch { @apply h-7 w-10 cursor-pointer rounded border border-slate-700 bg-transparent p-0; }
+}

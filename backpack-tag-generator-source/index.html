@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Backpack Tag Generator — 3D print &amp; laser cut</title>
+</head>
+<body class="h-full bg-slate-950 text-slate-200">
+<div class="flex h-full flex-col">
+
+  <!-- ============================================================ header -->
+  <header class="flex shrink-0 flex-wrap items-center gap-x-3 gap-y-2 border-b border-slate-800 bg-slate-900 px-3 py-2 sm:px-4 sm:py-2.5">
+    <div class="flex items-center gap-2.5">
+      <span class="grid h-7 w-7 place-items-center rounded bg-lime-400 font-bold text-slate-950">T</span>
+      <div>
+        <h1 class="text-sm font-semibold leading-tight">Backpack Tag Generator</h1>
+        <p class="text-[11px] leading-tight text-slate-500">Name to laser file or multi-colour print</p>
+      </div>
+    </div>
+
+    <div class="ml-auto flex items-center gap-1.5 sm:gap-2">
+      <div class="flex overflow-hidden rounded-md border border-slate-700">
+        <button id="unit-mm" class="px-2.5 py-1.5 text-[11px] font-semibold">mm</button>
+        <button id="unit-in" class="px-2.5 py-1.5 text-[11px] font-semibold">inches</button>
+      </div>
+      <button id="btn-svg" class="btn btn-s"><span class="hidden sm:inline">Download&nbsp;</span>SVG</button>
+      <button id="btn-stl" class="btn btn-s"><span class="hidden sm:inline">Download&nbsp;</span>STL</button>
+      <button id="btn-3mf" class="btn btn-p"><span class="hidden sm:inline">Download&nbsp;</span>3MF</button>
+    </div>
+  </header>
+
+  <div class="flex min-h-0 flex-1 flex-col lg:flex-row">
+    <!-- preview is order-1 on phones so the canvas is never pushed off-screen -->
+
+    <!-- ========================================================== sidebar -->
+    <aside class="order-2 min-h-0 w-full flex-1 overflow-y-auto border-slate-800 bg-slate-950 lg:order-1 lg:w-80 lg:flex-none lg:border-r">
+
+      <div class="space-y-3.5 border-b border-slate-800 px-4 py-4">
+        <div>
+          <div class="lbl">Your text <span id="ct-count" class="val">5</span></div>
+          <input id="f-text" class="inp" value="JULIA" placeholder="Type a name" />
+        </div>
+
+        <label class="flex items-center gap-2.5">
+          <input id="f-connect" type="checkbox" class="h-4 w-4 accent-lime-400" checked />
+          <span class="text-xs text-slate-300">Connect text</span>
+          <span class="ml-auto text-[11px] text-slate-500">weld loose letters</span>
+        </label>
+        <div id="wrap-gap">
+          <div class="lbl">Weld gap <span id="ct-gap" class="val">2%</span></div>
+          <input id="f-gap" type="range" min="0" max="14" step="0.5" value="2" class="rng" />
+        </div>
+
+        <div>
+          <div class="lbl">Font</div>
+          <select id="f-font" class="inp"></select>
+        </div>
+        <div class="flex gap-2">
+          <label class="btn btn-s flex-1 cursor-pointer">
+            Upload .ttf / .otf
+            <input id="f-fontfile" type="file" accept=".ttf,.otf,.woff" class="hidden" />
+          </label>
+          <button id="f-fontclear" class="btn btn-s">Reset</button>
+        </div>
+      </div>
+
+      <!-- dimensions -->
+      <section class="sec">
+        <button class="sec-h" data-acc="dims"><span class="sec-t">Tag size</span><span class="text-slate-600">−</span></button>
+        <div class="sec-b" data-body="dims">
+          <div>
+            <div class="lbl">Tag width <span class="text-[10px] normal-case tracking-normal text-slate-600">50–70</span> <span class="val"><span id="ct-w">50</span> <span class="u">mm</span></span></div>
+            <input id="f-width" type="range" min="50" max="70" step="1" value="50" class="rng" />
+          </div>
+          <div>
+            <div class="lbl">Outline size <span id="ct-out" class="val">17%</span></div>
+            <input id="f-outline" type="range" min="2" max="45" step="0.5" value="17" class="rng" />
+          </div>
+          <!-- fixed build depths: kept in the DOM so the solver and unit
+               conversion still read them, hidden from the user for now -->
+          <div class="hidden grid-cols-2 gap-2.5">
+            <div>
+              <div class="lbl">Base depth</div>
+              <input id="f-base" type="number" min="0.4" max="20" step="0.2" value="4" class="inp" />
+            </div>
+            <div>
+              <div class="lbl">Text raise</div>
+              <input id="f-raise" type="number" min="0.2" max="10" step="0.1" value="2" class="inp" />
+            </div>
+          </div>
+          <label class="flex items-center gap-2.5 pt-0.5">
+            <input id="f-bridge" type="checkbox" class="h-4 w-4 accent-lime-400" checked />
+            <span class="text-xs text-slate-300">Keep tag in one piece</span>
+          </label>
+        </div>
+      </section>
+
+      <!-- hanger -->
+      <section class="sec">
+        <button class="sec-h" data-acc="hang"><span class="sec-t">Hanger hole</span><span class="text-slate-600">−</span></button>
+        <div class="sec-b" data-body="hang">
+          <label class="flex items-center gap-2.5">
+            <input id="f-hang" type="checkbox" class="h-4 w-4 accent-lime-400" checked />
+            <span class="text-xs text-slate-300">Add hanger hole</span>
+          </label>
+          <div>
+            <div class="lbl">Position</div>
+            <div id="f-hangpos" class="grid grid-cols-3 gap-1.5">
+              <button class="chip" data-hp="left">Left</button>
+              <button class="chip" data-hp="right">Right</button>
+              <button class="chip" data-hp="top">Top</button>
+              <button class="chip chip-on" data-hp="top-left">Top left</button>
+              <button class="chip" data-hp="top-right">Top right</button>
+            </div>
+          </div>
+          <div class="grid grid-cols-2 gap-2.5">
+            <div>
+              <div class="lbl">Outer ring</div>
+              <input id="f-outer" type="number" min="3" max="60" step="0.5" value="8" class="inp" />
+            </div>
+            <div>
+              <div class="lbl">Inner hole</div>
+              <input id="f-inner" type="number" min="1" max="40" step="0.5" value="4" class="inp" />
+            </div>
+          </div>
+          <div class="grid grid-cols-2 gap-2.5">
+            <div>
+              <div class="lbl">Nudge X <span id="ct-hx" class="val">0</span></div>
+              <input id="f-holex" type="range" min="-30" max="30" step="0.5" value="0" class="rng" />
+            </div>
+            <div>
+              <div class="lbl">Nudge Y <span id="ct-hy" class="val">0</span></div>
+              <input id="f-holey" type="range" min="-30" max="30" step="0.5" value="0" class="rng" />
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- visuals -->
+      <section class="sec">
+        <button class="sec-h" data-acc="vis"><span class="sec-t">Colours</span><span class="text-slate-600">−</span></button>
+        <div class="sec-b" data-body="vis">
+          <label class="flex items-center justify-between">
+            <span class="text-xs text-slate-400">Background / base</span>
+            <input id="f-bg" type="color" value="#0f172a" class="swatch" />
+          </label>
+          <label class="flex items-center justify-between">
+            <span class="text-xs text-slate-400">Text &amp; symbols</span>
+            <input id="f-fg" type="color" value="#e2e8f0" class="swatch" />
+          </label>
+          <p class="text-[11px] leading-relaxed text-slate-500">
+            These two colours become the material groups in the 3MF, so an AMS or MMU
+            prints the plate and the lettering in different filaments.
+          </p>
+        </div>
+      </section>
+    </aside>
+
+    <!-- ========================================================= viewport -->
+    <main class="relative order-1 flex h-[52vh] min-h-0 shrink-0 flex-col border-b border-slate-800 bg-slate-950 lg:order-2 lg:h-auto lg:flex-1 lg:border-b-0">
+      <div class="flex shrink-0 flex-wrap items-center gap-1.5 border-b border-slate-800 px-2 py-1.5 sm:gap-2 sm:px-3 sm:py-2">
+        <div class="flex overflow-hidden rounded-md border border-slate-700">
+          <button id="v-3d" class="px-3 py-1.5 text-[11px] font-semibold">3D</button>
+          <button id="v-2d" class="px-3 py-1.5 text-[11px] font-semibold">2D</button>
+        </div>
+        <div id="v3d-tools" class="flex gap-1.5">
+          <button class="chip" data-view="iso">Iso</button>
+          <button class="chip" data-view="top">Top</button>
+          <button class="chip" data-view="front">Front</button>
+          <button class="chip" data-view="fit">Fit</button>
+        </div>
+        <label id="v2d-tools" class="hidden items-center gap-2">
+          <input id="f-cutview" type="checkbox" class="h-3.5 w-3.5 accent-lime-400" />
+          <span class="text-[11px] text-slate-400">Show laser layers</span>
+          <span class="ml-1 inline-flex items-center gap-1 text-[11px] text-slate-500">
+            <span class="inline-block h-2 w-2 rounded-full bg-red-500"></span>cut
+            <span class="ml-1 inline-block h-2 w-2 rounded-full bg-blue-500"></span>engrave
+          </span>
+        </label>
+        <div id="warn" class="ml-auto hidden items-center gap-2 rounded border border-amber-700 bg-amber-950 px-2.5 py-1 text-[11px] text-amber-300"></div>
+      </div>
+
+      <div class="relative min-h-0 flex-1">
+        <div id="viewport" class="absolute inset-0"></div>
+        <div id="svgview" class="absolute inset-0 hidden items-center justify-center p-8"></div>
+        <div id="busy" class="pointer-events-none absolute inset-x-0 top-3 hidden justify-center">
+          <span class="rounded border border-slate-700 bg-slate-900 px-3 py-1.5 text-[11px] text-slate-300">Solving geometry…</span>
+        </div>
+      </div>
+
+      <div class="grid shrink-0 grid-cols-2 gap-px border-t border-slate-800 bg-slate-800 text-center sm:grid-cols-5">
+        <div class="bg-slate-950 px-2 py-1.5 sm:py-2.5"><div class="text-[10px] uppercase tracking-wider text-slate-500">Plate width</div><div class="font-mono text-sm text-slate-100"><span id="s-pw">–</span><span class="u ml-0.5 text-[10px] text-slate-500">mm</span></div></div>
+        <div class="bg-slate-950 px-2 py-1.5 sm:py-2.5"><div class="text-[10px] uppercase tracking-wider text-slate-500">Overall W</div><div class="font-mono text-sm text-slate-100"><span id="s-ow">–</span><span class="u ml-0.5 text-[10px] text-slate-500">mm</span></div></div>
+        <div class="bg-slate-950 px-2 py-1.5 sm:py-2.5"><div class="text-[10px] uppercase tracking-wider text-slate-500">Overall H</div><div class="font-mono text-sm text-slate-100"><span id="s-oh">–</span><span class="u ml-0.5 text-[10px] text-slate-500">mm</span></div></div>
+        <div class="bg-slate-950 px-2 py-1.5 sm:py-2.5"><div class="text-[10px] uppercase tracking-wider text-slate-500">Total Z</div><div class="font-mono text-sm text-slate-100"><span id="s-z">–</span><span class="u ml-0.5 text-[10px] text-slate-500">mm</span></div></div>
+        <div class="col-span-2 bg-slate-950 px-2 py-1.5 sm:col-span-1 sm:py-2.5"><div class="text-[10px] uppercase tracking-wider text-slate-500">Pieces / holes</div><div class="font-mono text-sm text-slate-100"><span id="s-pieces">–</span></div></div>
+      </div>
+    </main>
+  </div>
+</div>
+<script type="module" src="./src/app.js"></script>
+</body>
+</html>
